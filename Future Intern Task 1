@@ -1,0 +1,124 @@
+
+const PROFILE = {
+  name: "Eman Fatima",
+  role: "Front-End Developer · ML Enthusiast",
+  tagline:
+    "I build clean, accessible interfaces and turn data into meaningful experiences.",
+  location: "Faisalabad, Pakistan",
+  email: "emankasana@gmail.com",
+  phone: "+92 3003580475",
+  website: "eman.dev",
+  },
+};
+
+const SKILLS = [
+  { name: "React", level: 90 },
+  { name: "TypeScript", level: 80 },
+  { name: "TailwindCSS", level: 90 },
+  { name: "Node.js", level: 70 },
+  { name: "Python", level: 65 },
+  { name: "XGBoost", level: 60 },
+  { name: "Random Forest", level: 65 },
+  { name: "LogReg", level: 70 },
+];
+
+const PROJECTS = [
+  {
+    title: "Heart Disease Prediction",
+    year: "2025",
+    category: "ML",
+    summary:
+      "End‑to‑end ML app using XGBoost, Random Forest, and Logistic Regression with a clean React UI.",
+    tech: ["React", "Python", "FastAPI", "XGBoost", "Tailwind"],
+    
+  },
+  {
+    title: "MERN E‑Commerce",
+    year: "2024",
+    category: "Web",
+    summary:
+      "Full‑stack shop with JWT auth, Stripe checkout, and an elegant dashboard.",
+    tech: ["React", "Express", "MongoDB", "Stripe"],
+    
+  },
+  {
+    title: "UI Design System",
+    year: "2024",
+    category: "Design",
+    summary: "Reusable components, tokens, and accessibility guidelines.",
+    tech: ["Figma", "Storybook", "Tailwind"],
+    
+  },
+  {
+    title: "Analytics Dashboard",
+    year: "2023",
+    category: "Web",
+    summary: "Real‑time charts, role‑based access, and audit logging.",
+    tech: ["Next.js", "Prisma", "Postgres", "Recharts"],
+    
+  },
+];
+
+const EXPERIENCE = [
+  {
+    role: "Front‑End Intern",
+    org: "Tech Studio",
+    period: "Jun 2024 – Sep 2024",
+    points: [
+      "Built responsive pages with React + Tailwind, reducing CLS by 35%.",
+      "Collaborated with designers to implement accessible components.",
+    ],
+  },
+  {
+    role: "Freelance Developer",
+    org: "Self‑Employed",
+    period: "2023 – Present",
+    points: [
+      "Delivered 10+ client sites with SEO best practices.",
+      "Integrated Stripe/PayPal and wrote maintainable docs.",
+    ],
+  },
+];
+
+const ACHIEVEMENTS = [
+  { title: "Dean's List", by: "BSIT Program", year: "2024" },
+  { title: "Hackathon Finalist", by: "DevFest", year: "2023" },
+  { title: "Top Volunteer", by: "Women Who Code", year: "2022" },
+];
+
+const TAGS = ["All", "Web", "ML", "Design"] as const;
+
+// Utility: theme toggle
+function useTheme() {
+  const [dark, setDark] = useState(true);
+  useEffect(() => {
+    const stored = localStorage.getItem("prefers-dark");
+    const isDark = stored ? stored === "true" : true;
+    setDark(isDark);
+  }, []);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("prefers-dark", String(dark));
+  }, [dark]);
+  return { dark, setDark };
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
+const Section = ({ id, title, children }: { id: string; title: string; children: React.ReactNode }) => (
+  <section id={id} className="scroll-mt-24 py-12 md:py-20">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={fadeUp}
+      className="max-w-6xl mx-auto px-4"
+    >
+      <div className="flex items-center gap-3 mb-8">
+        <Sparkles className="w-5 h-5" />
+        <h2 className="text-2xl md:text-3xl font-semibold">{title}</h2>
+      </div>
+
