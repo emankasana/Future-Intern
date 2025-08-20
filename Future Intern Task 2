@@ -1,0 +1,163 @@
+import React, { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, Minus, Plus, X, Search, Loader2, CreditCard, CheckCircle2, Trash2, SlidersHorizontal } from "lucide-react";
+
+
+ * Mini E‑Commerce React App
+ * - Tech: React + Tailwind CSS (UI), useContext (state), Framer Motion (animations)
+ * - Features: Product listing w/ search + filter, cart w/ quantity controls, checkout simulation w/ form validation
+ * - Notes: All data is mocked in-memory. No backend required
+ * Tailwind Utility Helpers
+
+const cn = (...cls) => cls.filter(Boolean).join(" ");
+
+
+ * Mock Data
+const PRODUCTS = [
+  {
+    id: "p-1",
+    title: "Minimal Hoodie",
+    description: "Soft fleece-lined hoodie with minimalist branding.",
+    price: 42.99,
+    category: "Apparel",
+    rating: 4.6,
+    stock: 18,
+    image: "https://images.unsplash.com/photo-1520975932065-39bcbf5b2a81?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    id: "p-2",
+    title: "Wireless Earbuds",
+    description: "Bluetooth 5.3 low-latency earbuds with charging case.",
+    price: 59.0,
+    category: "Electronics",
+    rating: 4.4,
+    stock: 30,
+    image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    id: "p-3",
+    title: "Ceramic Mug",
+    description: "Matte ceramic mug, 350ml, dishwasher safe.",
+    price: 12.5,
+    category: "Home",
+    rating: 4.7,
+    stock: 40,
+    image: "https://images.unsplash.com/photo-1484901546977-48bb0bfc1107?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    id: "p-4",
+    title: "Desk Lamp",
+    description: "Adjustable LED desk lamp with touch dimmer.",
+    price: 36.75,
+    category: "Home",
+    rating: 4.3,
+    stock: 12,
+    image: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    id: "p-5",
+    title: "Running Shoes",
+    description: "Lightweight breathable runners for daily miles.",
+    price: 68.0,
+    category: "Apparel",
+    rating: 4.5,
+    stock: 16,
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    id: "p-6",
+    title: "Mechanical Keyboard",
+    description: "Hot‑swappable 75% mechanical keyboard, USB‑C.",
+    price: 89.99,
+    category: "Electronics",
+    rating: 4.8,
+    stock: 9,
+    image: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1200&auto=format&fit=crop"
+  }
+];
+
+
+ 
+const CartContext = createContext(null);
+
+const cartReducer = (state, action) => {
+  switch (action.type) {
+    case "INIT": {
+      return action.payload || [];
+    }
+    case "ADD": {
+      const { id } = action;
+      const existing = state.find((i) => i.id === id);
+      if (existing) {
+        return state.map((i) => (i.id === id ? { ...i, qty: Math.min(i.qty + 1, 99) } : i));
+      }
+      return [...state, { id, qty: 1 }];
+    }
+    case "INC": {
+      return state.map((i) => (i.id === action.id ? { ...i, qty: Math.min(i.qty + 1, 99) } : i));
+    }
+    case "DEC": {
+      return state
+        .map((i) => (i.id === action.id ? { ...i, qty: Math.max(i.qty - 1, 1) } : i))
+        .filter((i) => i.qty > 0);
+    }
+    case "REMOVE": {
+      return state.filter((i) => i.id !== action.id);
+    }
+    case "CLEAR": {
+      return [];
+    }
+    default:
+      return state;
+  }
+};
+
+const CartProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(cartReducer, []);
+
+  // hydrate from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("mini-cart");
+      if (raw) dispatch({ type: "INIT", payload: JSON.parse(raw) });
+    } catch {}
+  }, []);
+
+  // persist to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("mini-cart", JSON.stringify(state));
+    } catch {}
+  }, [state]);
+
+  const add = (id) => dispatch({ type: "ADD", id });
+  const inc = (id) => dispatch({ type: "INC", id });
+  const dec = (id) => dispatch({ type: "DEC", id });
+  const remove = (id) => dispatch({ type: "REMOVE", id });
+  const clear = () => dispatch({ type: "CLEAR" });
+
+  const value = useMemo(() => ({ items: state, add, inc, dec, remove, clear }), [state]);
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+};
+
+const useCart = () => useContext(CartContext);
+
+
+
+const Header = ({ onOpenCart }) => {
+  const { items } = useCart();
+  const totalQty = items.reduce((s, i) => s + i.qty, 0);
+  return (
+    <header className="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-neutral-900/70 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold">mini<strong className="text-indigo-600">Shop</strong></span>
+          <span className="hidden sm:inline text-sm text-neutral-500">React • Tailwind • useContext</span>
+        </div>
+        <button
+          onClick={onOpenCart}
+          className="relative inline-flex items-center gap-2 rounded-2xl px-4 py-2 border border-neutral-200 dark:border-neutral-800 hover:shadow-sm"
+        >
+          <ShoppingCart className="w-5 h-5" />
+          <span className="text-sm">Cart</span>
+          <span className="a
